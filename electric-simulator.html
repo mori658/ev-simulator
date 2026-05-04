@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulatore Elettrico</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0c0c10;
+    --surface: #14141c;
+    --surface2: #1c1c28;
+    --accent: #00e5c0;
+    --accent2: #0099ff;
+    --text: #f0f0f5;
+    --muted: #888898;
+    --border: rgba(255,255,255,0.07);
+    --card-radius: 16px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0c0c10 0%, #0d1a2e 50%, #0c1a1a 100%);
+    padding: 64px 24px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(0,229,192,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(36px, 7vw, 68px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+  .hero p {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── TABS ── */
+  .tabs-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 16px 80px;
+  }
+  .tabs-nav {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 6px;
+    margin: -28px auto 40px;
+    position: relative;
+    z-index: 2;
+    border: 1px solid var(--border);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 12px 8px;
+    background: none;
+    border: none;
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .25s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    background: linear-gradient(135deg, rgba(0,229,192,0.15), rgba(0,153,255,0.1));
+    color: var(--accent);
+    border: 1px solid rgba(0,229,192,0.25);
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeUp .35s ease; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 32px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+
+  /* ── VEHICLE SELECTOR ── */
+  .vehicle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .v-card {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 12px;
+    cursor: pointer;
+    transition: all .2s;
+    text-align: center;
+  }
+  .v-card:hover { border-color: rgba(0,229,192,0.3); }
+  .v-card.selected {
+    border-color: var(--accent);
+    background: rgba(0,229,192,0.06);
+  }
+  .v-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .v-sub {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ── FORM ELEMENTS ── */
+  .field { margin-bottom: 28px; }
+  .field-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .field-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* Slider */
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 10px rgba(0,229,192,0.4);
+    cursor: pointer;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--bg);
+    cursor: pointer;
+  }
+
+  /* Button group */
+  .btn-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn-opt {
+    padding: 8px 18px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-opt:hover { border-color: rgba(0,229,192,0.3); color: var(--text); }
+  .btn-opt.active { border-color: var(--accent); color: var(--accent); background: rgba(0,229,192,0.07); }
+
+  /* ── RESULTS ── */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 32px;
+  }
+  .result-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .result-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .result-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .result-unit {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-left: 2px;
+  }
+  .result-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  /* ── CHARGE BAR ── */
+  .charge-bar-wrap {
+    margin: 20px 0;
+    position: relative;
+  }
+  .charge-bar-bg {
+    height: 10px;
+    background: var(--surface2);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .charge-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    transition: width .4s cubic-bezier(.4,0,.2,1);
+  }
+  .charge-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* ── CHARGING TABLE ── */
+  .charge-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 24px;
+    font-size: 14px;
+  }
+  .charge-table th {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .charge-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .charge-table tr:last-child td { border-bottom: none; }
+  .charge-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .time-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* ── MODEL CARDS ── */
+  .model-cards { display: grid; gap: 16px; }
+  .model-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    transition: border-color .2s;
+  }
+  .model-card:hover { border-color: rgba(0,229,192,0.3); }
+  .model-card.best {
+    border-color: rgba(0,229,192,0.4);
+    background: linear-gradient(135deg, rgba(0,229,192,0.05), rgba(0,153,255,0.03));
+  }
+  .model-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+  .model-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .model-desc { font-size: 13px; color: var(--muted); max-width: 280px; }
+  .model-stats { display: flex; gap: 24px; flex-shrink: 0; }
+  .stat-item { text-align: center; }
+  .stat-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-unit { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ── CTA BTN ── */
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 10px;
+    color: #000;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+    margin-top: 24px;
+  }
+  .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,229,192,0.3); }
+
+  /* Info banner */
+  .info-banner {
+    background: rgba(0,153,255,0.07);
+    border: 1px solid rgba(0,153,255,0.2);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .info-banner strong { color: var(--text); }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 28px 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .card { padding: 20px 16px; }
+    .model-card { flex-direction: column; align-items: flex-start; }
+    .model-stats { flex-wrap: wrap; }
+    .tabs-nav { flex-direction: column; }
+    .results-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <p class="hero-eyebrow">⚡ Strumento Interattivo</p>
+  <h1>Simulatore<br>Elettrico</h1>
+  <p>Calcola l'autonomia reale, i tempi di ricarica e scopri quale modello elettrico si adatta meglio alle tue esigenze.</p>
+</div>
+
+<div class="tabs-wrapper">
+
+  <!-- TABS NAV -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab('autonomia', this)">🔋 Autonomia</button>
+    <button class="tab-btn" onclick="switchTab('ricarica', this)">⚡ Ricarica</button>
+    <button class="tab-btn" onclick="switchTab('modello', this)">🚗 Trova modello</button>
+  </div>
+
+  <!-- ═══════════════ TAB 1: AUTONOMIA ═══════════════ -->
+  <div id="tab-autonomia" class="tab-panel active">
+    <div class="card">
+      <p class="card-title">Seleziona il veicolo</p>
+      <div class="vehicle-grid" id="vGrid1"></div>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Il tuo profilo di utilizzo</p>
+
+      <div class="field">
+        <div class="field-label">Tipo di percorso <span class="field-value" id="percorso-val">Misto</span></div>
+        <div class="btn-group">
+          <button class="btn-opt" onclick="setPercorso('urbano',this)">🏙️ Urbano</button>
+          <button class="btn-opt active" onclick="setPercorso('misto',this)">🛣️ Misto</button>
+          <button class="btn-opt" onclick="setPercorso('autostrada',this)">🛤️ Autostrada</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Temperatura esterna <span class="field-value" id="temp-val">20°C</span></div>
+        <input type="range" id="sl-temp" min="-10" max="40" value="20" oninput="updateAutonomia()">
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--muted)">
+          <span>-10°C ❄️</span><span>40°C ☀️</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Climatizzatore <span class="field-value" id="clima-val">Moderato</span></div>
+        <div class="btn-group">
+          <button class="btn-opt" onclick="setClima('spento',this)">Spento</button>
+          <button class="btn-opt active" onclick="setClima('moderato',this)">Moderato</button>
+          <button class="btn-opt" onclick="setClima('intenso',this)">Intenso</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Stile di guida <span class="field-value" id="guida-val">Normale</span></div>
+        <div class="btn-group">
+          <button class="btn-opt" onclick="setGuida('eco',this)">🌿 Eco</button>
+          <button class="btn-opt active" onclick="setGuida('normale',this)">Normal</button>
+          <button class="btn-opt" onclick="setGuida('sportivo',this)">🏁 Sport</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Carico nel veicolo <span class="field-value" id="carico-val">Vuoto</span></div>
+        <div class="btn-group">
+          <button class="btn-opt active" onclick="setCarico('vuoto',this)">👤 Solo</button>
+          <button class="btn-opt" onclick="setCarico('pieno',this)">👨‍👩‍👧‍👦 Famiglia</button>
+          <button class="btn-opt" onclick="setCarico('carico',this)">📦 Carico pieno</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="card" id="autonomia-results">
+      <p class="card-title">Risultati stimati</p>
+      <div class="results-grid">
+        <div class="result-box">
+          <div><span class="result-num" id="res-km">—</span><span class="result-unit">km</span></div>
+          <div class="result-label">Autonomia stimata</div>
+        </div>
+        <div class="result-box">
+          <div><span class="result-num" id="res-kwh">—</span><span class="result-unit">kWh/100km</span></div>
+          <div class="result-label">Consumo stimato</div>
+        </div>
+        <div class="result-box">
+          <div><span class="result-num" id="res-perc">—</span><span class="result-unit">%</span></div>
+          <div class="result-label">Efficienza rispetto al WLTP</div>
+        </div>
+      </div>
+      <div class="info-banner" style="margin-top:20px;margin-bottom:0">
+        ℹ️ <strong>Nota:</strong> Stime calcolate sulla base di fattori reali (temperatura, stile di guida, carico). I valori WLTP sono in condizioni di laboratorio.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TAB 2: RICARICA ═══════════════ -->
+  <div id="tab-ricarica" class="tab-panel">
+    <div class="card">
+      <p class="card-title">Seleziona il veicolo</p>
+      <div class="vehicle-grid" id="vGrid2"></div>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Stato attuale della batteria</p>
+
+      <div class="field">
+        <div class="field-label">Livello attuale <span class="field-value" id="soc-start-val">20%</span></div>
+        <input type="range" id="sl-soc-start" min="0" max="90" value="20" step="5" oninput="updateRicarica()">
+      </div>
+
+      <div class="field">
+        <div class="field-label">Obiettivo di carica <span class="field-value" id="soc-end-val">80%</span></div>
+        <input type="range" id="sl-soc-end" min="10" max="100" value="80" step="5" oninput="updateRicarica()">
+      </div>
+
+      <div class="charge-bar-wrap">
+        <div class="charge-bar-bg">
+          <div class="charge-bar-fill" id="charge-bar-fill" style="width:60%;margin-left:20%"></div>
+        </div>
+        <div class="charge-bar-labels"><span id="bar-start-lbl">20%</span><span id="bar-end-lbl">80%</span></div>
+      </div>
+
+      <div class="divider"></div>
+      <p class="card-title" style="margin-bottom:8px">Tipo di ricarica disponibile</p>
+      <div class="btn-group">
+        <button class="btn-opt" onclick="setPower('casa',this)">🏠 Presa normale (2,3 kW)</button>
+        <button class="btn-opt active" onclick="setPower('wallbox',this)">⚡ Wallbox (7,4 kW)</button>
+        <button class="btn-opt" onclick="setPower('wallbox22',this)">⚡ Wallbox (22 kW)</button>
+        <button class="btn-opt" onclick="setPower('rapida',this)">🔌 Colonnina rapida</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Tempo di ricarica stimato</p>
+      <div class="results-grid">
+        <div class="result-box">
+          <div><span class="result-num" id="res-h">—</span><span class="result-unit" id="res-h-unit">h</span></div>
+          <div class="result-label" id="res-h-lbl">Tempo totale</div>
+        </div>
+        <div class="result-box">
+          <div><span class="result-num" id="res-kwh-added">—</span><span class="result-unit">kWh</span></div>
+          <div class="result-label">Energia aggiunta</div>
+        </div>
+        <div class="result-box">
+          <div><span class="result-num" id="res-cost">—</span><span class="result-unit">€</span></div>
+          <div class="result-label">Costo stimato (0,25€/kWh)</div>
+        </div>
+      </div>
+
+      <table class="charge-table" id="charge-table">
+        <thead>
+          <tr>
+            <th>Tipo di ricarica</th>
+            <th>Potenza</th>
+            <th>Tempo stimato</th>
+          </tr>
+        </thead>
+        <tbody id="charge-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TAB 3: MODELLO ═══════════════ -->
+  <div id="tab-modello" class="tab-panel">
+    <div class="card">
+      <p class="card-title">Il tuo utilizzo quotidiano</p>
+
+      <div class="field">
+        <div class="field-label">Km percorsi al giorno (media) <span class="field-value" id="km-day-val">50 km</span></div>
+        <input type="range" id="sl-km-day" min="10" max="300" value="50" step="10" oninput="updateModello()">
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--muted)">
+          <span>10 km</span><span>300 km</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Tipo di uso prevalente <span class="field-value" id="uso-val">Città</span></div>
+        <div class="btn-group">
+          <button class="btn-opt active" onclick="setUso('citta',this)">🏙️ Città</button>
+          <button class="btn-opt" onclick="setUso('misto',this)">🛣️ Misto</button>
+          <button class="btn-opt" onclick="setUso('lunghi',this)">✈️ Lunghi percorsi</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Ricarica a casa? <span class="field-value" id="home-val">Sì</span></div>
+        <div class="btn-group">
+          <button class="btn-opt active" onclick="setHome('si',this)">✅ Sì</button>
+          <button class="btn-opt" onclick="setHome('no',this)">❌ No</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Numero di passeggeri abituali <span class="field-value" id="pass-val">1-2</span></div>
+        <div class="btn-group">
+          <button class="btn-opt active" onclick="setPass('1-2',this)">👤 1-2</button>
+          <button class="btn-opt" onclick="setPass('3-4',this)">👥 3-4</button>
+          <button class="btn-opt" onclick="setPass('5+',this)">👨‍👩‍👧‍👦 5+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="modello-results">
+      <p class="card-title">Modelli consigliati per te</p>
+      <div class="model-cards" id="model-cards-list"></div>
+    </div>
+  </div>
+
+</div><!-- /tabs-wrapper -->
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const vehicles = [
+  { id: 'e208',  name: 'e-208',  bat: 51,  wltp: 345, maxAC: 11,  maxDC: 100, seg: 'city',  pass: '1-2', desc: 'City car compatta' },
+  { id: 'e2008', name: 'e-2008', bat: 54,  wltp: 406, maxAC: 11,  maxDC: 100, seg: 'suv',   pass: '1-2', desc: 'SUV compatto' },
+  { id: 'e308',  name: 'e-308',  bat: 54,  wltp: 420, maxAC: 11,  maxDC: 100, seg: 'berli', pass: '3-4', desc: 'Berlina familiare' },
+  { id: 'e3008', name: 'e-3008', bat: 73,  wltp: 527, maxAC: 11,  maxDC: 160, seg: 'suv',   pass: '3-4', desc: 'SUV elettrico' },
+  { id: 'e3008L',name: 'e-3008 LR',bat: 98,wltp: 700, maxAC: 11,  maxDC: 160, seg: 'suv',   pass: '3-4', desc: 'Autonomia estesa' },
+  { id: 'e5008', name: 'e-5008', bat: 98,  wltp: 660, maxAC: 11,  maxDC: 160, seg: 'family',pass: '5+', desc: 'SUV 7 posti' },
+];
+
+const chargePoints = [
+  { label: 'Presa 230V', power: 2.3,  type: 'AC' },
+  { label: 'Wallbox 7.4 kW', power: 7.4,  type: 'AC' },
+  { label: 'Wallbox 11 kW', power: 11,   type: 'AC' },
+  { label: 'Wallbox 22 kW', power: 22,   type: 'AC' },
+  { label: 'DC 50 kW', power: 50,   type: 'DC' },
+  { label: 'DC 100 kW', power: 100,  type: 'DC' },
+  { label: 'DC 160 kW', power: 160,  type: 'DC' },
+];
+
+// ── State ──
+let state = {
+  v1: 'e208', v2: 'e208',
+  percorso: 'misto', temp: 20, clima: 'moderato', guida: 'normale', carico: 'vuoto',
+  socStart: 20, socEnd: 80, powerType: 'wallbox',
+  kmDay: 50, uso: 'citta', home: 'si', pass: '1-2'
+};
+
+// ══════════════════════════════════════════
+// RENDER VEHICLE GRIDS
+// ══════════════════════════════════════════
+function renderVehicleGrid(containerId, stateKey) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = vehicles.map(v => `
+    <div class="v-card ${state[stateKey]===v.id?'selected':''}" onclick="selectVehicle('${stateKey}','${v.id}','${containerId}')">
+      <div class="v-name">${v.name}</div>
+      <div class="v-sub">${v.bat} kWh · ${v.wltp} km</div>
+    </div>
+  `).join('');
+}
+
+function selectVehicle(key, id, containerId) {
+  state[key] = id;
+  renderVehicleGrid(containerId, key);
+  if (key === 'v1') updateAutonomia();
+  if (key === 'v2') updateRicarica();
+}
+
+// ══════════════════════════════════════════
+// TAB 1 — AUTONOMIA
+// ══════════════════════════════════════════
+function setPercorso(v, btn) {
+  state.percorso = v;
+  setBtnGroup(btn);
+  document.getElementById('percorso-val').textContent = {urbano:'Urbano',misto:'Misto',autostrada:'Autostrada'}[v];
+  updateAutonomia();
+}
+function setClima(v, btn) {
+  state.clima = v;
+  setBtnGroup(btn);
+  document.getElementById('clima-val').textContent = {spento:'Spento',moderato:'Moderato',intenso:'Intenso'}[v];
+  updateAutonomia();
+}
+function setGuida(v, btn) {
+  state.guida = v;
+  setBtnGroup(btn);
+  document.getElementById('guida-val').textContent = {eco:'Eco',normale:'Normale',sportivo:'Sportivo'}[v];
+  updateAutonomia();
+}
+function setCarico(v, btn) {
+  state.carico = v;
+  setBtnGroup(btn);
+  document.getElementById('carico-val').textContent = {vuoto:'Vuoto',pieno:'Pieno',carico:'Carico'}[v];
+  updateAutonomia();
+}
+
+function updateAutonomia() {
+  const v = vehicles.find(x => x.id === state.v1);
+  if (!v) return;
+
+  const temp = parseInt(document.getElementById('sl-temp').value);
+  document.getElementById('temp-val').textContent = temp + '°C';
+  state.temp = temp;
+
+  // Coefficients
+  let coeff = 1.0;
+  if (state.percorso === 'urbano')    coeff += 0.1;
+  if (state.percorso === 'autostrada') coeff -= 0.18;
+  if (state.guida === 'eco')    coeff += 0.08;
+  if (state.guida === 'sportivo') coeff -= 0.12;
+  if (state.clima === 'moderato') coeff -= 0.06;
+  if (state.clima === 'intenso')  coeff -= 0.14;
+  if (state.carico === 'pieno')  coeff -= 0.05;
+  if (state.carico === 'carico') coeff -= 0.10;
+  // Temperature effect
+  if (temp < 5)  coeff -= 0.22;
+  else if (temp < 10) coeff -= 0.12;
+  else if (temp < 15) coeff -= 0.06;
+  else if (temp > 35) coeff -= 0.06;
+
+  coeff = Math.max(0.45, Math.min(1.15, coeff));
+
+  const km = Math.round(v.wltp * coeff);
+  const kwh100 = ((v.bat / km) * 100).toFixed(1);
+  const perc = Math.round(coeff * 100);
+
+  document.getElementById('res-km').textContent = km;
+  document.getElementById('res-kwh').textContent = kwh100;
+  document.getElementById('res-perc').textContent = perc;
+}
+
+// ══════════════════════════════════════════
+// TAB 2 — RICARICA
+// ══════════════════════════════════════════
+const powerMap = {
+  casa:      2.3,
+  wallbox:   7.4,
+  wallbox22: 22,
+  rapida:    null // uses maxDC
+};
+
+function setPower(v, btn) {
+  state.powerType = v;
+  setBtnGroup(btn);
+  updateRicarica();
+}
+
+function updateRicarica() {
+  const v = vehicles.find(x => x.id === state.v2);
+  if (!v) return;
+
+  let start = parseInt(document.getElementById('sl-soc-start').value);
+  let end   = parseInt(document.getElementById('sl-soc-end').value);
+  if (end <= start) { end = Math.min(start + 10, 100); document.getElementById('sl-soc-end').value = end; }
+
+  document.getElementById('soc-start-val').textContent = start + '%';
+  document.getElementById('soc-end-val').textContent = end + '%';
+  document.getElementById('bar-start-lbl').textContent = start + '%';
+  document.getElementById('bar-end-lbl').textContent = end + '%';
+
+  const fillLeft = start;
+  const fillWidth = end - start;
+  const bar = document.getElementById('charge-bar-fill');
+  bar.style.marginLeft = fillLeft + '%';
+  bar.style.width = fillWidth + '%';
+
+  const kwhNeeded = v.bat * (end - start) / 100;
+  const effLoss = 0.90; // charging efficiency
+
+  // Main power
+  let mainPow = state.powerType === 'rapida' ? v.maxDC : powerMap[state.powerType];
+  mainPow = Math.min(mainPow, state.powerType === 'rapida' ? v.maxDC : v.maxAC);
+  const mainTime = (kwhNeeded / effLoss) / mainPow;
+
+  document.getElementById('res-h').textContent = formatTime(mainTime).val;
+  document.getElementById('res-h-unit').textContent = formatTime(mainTime).unit;
+  document.getElementById('res-kwh-added').textContent = kwhNeeded.toFixed(1);
+  document.getElementById('res-cost').textContent = (kwhNeeded * 0.25).toFixed(2);
+
+  // Full table
+  const tbody = document.getElementById('charge-table-body');
+  tbody.innerHTML = chargePoints.map(cp => {
+    const pow = Math.min(cp.power, cp.type === 'DC' ? v.maxDC : v.maxAC);
+    const t = (kwhNeeded / effLoss) / pow;
+    const ft = formatTime(t);
+    return `<tr>
+      <td>${cp.label}</td>
+      <td style="color:var(--muted)">${pow} kW</td>
+      <td><span class="time-val">${ft.val}</span> <span style="color:var(--muted);font-size:13px">${ft.unit}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function formatTime(hours) {
+  if (hours < 1) {
+    return { val: Math.round(hours * 60), unit: 'min' };
+  }
+  const h = Math.floor(hours);
+  const m = Math.round((hours - h) * 60);
+  if (m === 0) return { val: h + 'h', unit: '' };
+  return { val: `${h}h ${m}`, unit: 'min' };
+}
+
+// ══════════════════════════════════════════
+// TAB 3 — MODELLO
+// ══════════════════════════════════════════
+function setUso(v, btn) { state.uso = v; setBtnGroup(btn); document.getElementById('uso-val').textContent = {citta:'Città',misto:'Misto',lunghi:'Lunghi percorsi'}[v]; updateModello(); }
+function setHome(v, btn) { state.home = v; setBtnGroup(btn); document.getElementById('home-val').textContent = {si:'Sì',no:'No'}[v]; updateModello(); }
+function setPass(v, btn) { state.pass = v; setBtnGroup(btn); document.getElementById('pass-val').textContent = v; updateModello(); }
+
+function updateModello() {
+  const km = parseInt(document.getElementById('sl-km-day').value);
+  document.getElementById('km-day-val').textContent = km + ' km';
+  state.kmDay = km;
+
+  // Score each vehicle
+  const scored = vehicles.map(v => {
+    let score = 0;
+    const neededRange = km * (state.home === 'si' ? 1.5 : 2.5);
+    if (v.wltp >= neededRange) score += 30;
+    else if (v.wltp >= neededRange * 0.8) score += 15;
+
+    if (state.pass === '1-2' && (v.seg === 'city' || v.seg === 'berli')) score += 20;
+    if (state.pass === '3-4' && v.seg === 'suv') score += 20;
+    if (state.pass === '5+' && v.seg === 'family') score += 30;
+
+    if (state.uso === 'citta' && v.seg === 'city') score += 15;
+    if (state.uso === 'lunghi' && v.bat >= 73) score += 20;
+    if (state.uso === 'misto' && (v.seg === 'suv' || v.seg === 'berli')) score += 10;
+
+    if (state.home === 'no' && v.maxDC >= 100) score += 10;
+
+    return { ...v, score };
+  }).sort((a, b) => b.score - a.score).slice(0, 3);
+
+  const list = document.getElementById('model-cards-list');
+  list.innerHTML = scored.map((v, i) => `
+    <div class="model-card ${i===0?'best':''}">
+      <div>
+        ${i===0 ? '<div class="model-badge">⭐ Consigliato per te</div>' : `<div class="model-badge" style="-webkit-text-fill-color:var(--muted);background:none;color:var(--muted)">#${i+1} Alternativa</div>`}
+        <div class="model-name">${v.name}</div>
+        <div class="model-desc">${v.desc} · Batteria ${v.bat} kWh</div>
+      </div>
+      <div class="model-stats">
+        <div class="stat-item">
+          <div class="stat-val">${v.wltp}</div>
+          <div class="stat-unit">km WLTP</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">${v.bat}</div>
+          <div class="stat-unit">kWh</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">${v.maxDC}</div>
+          <div class="stat-unit">kW DC</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+function setBtnGroup(clickedBtn) {
+  const parent = clickedBtn.closest('.btn-group');
+  if (parent) parent.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
+  clickedBtn.classList.add('active');
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+renderVehicleGrid('vGrid1', 'v1');
+renderVehicleGrid('vGrid2', 'v2');
+updateAutonomia();
+updateRicarica();
+updateModello();
+</script>
+</body>
+</html>
