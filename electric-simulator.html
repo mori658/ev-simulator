@@ -918,5 +918,17 @@ updateAutonomia();
 updateRicarica();
 updateModello();
 </script>
+<!-- Aggiunge AUTO-RESIZE: incolla questo blocco prima del </body> nel tuo electric-simulator.html -->
+<script>
+  // Invia l'altezza reale al parent ogni volta che il contenuto cambia
+  function evSendHeight() {
+    const h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ evSimHeight: h }, '*');
+  }
+  // Osserva qualsiasi cambiamento di dimensione nel DOM
+  new ResizeObserver(evSendHeight).observe(document.body);
+  // Invia anche subito al caricamento
+  window.addEventListener('load', evSendHeight);
+</script>
 </body>
 </html>
