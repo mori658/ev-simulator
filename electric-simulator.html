@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trova il tuo modello elettrico</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── DESIGN TOKENS (allineati alla style guide) ── */
+:root {
+  --bg:       #001733;
+  --panel:    #111a2e;
+  --panel2:   #0f1730;
+  --card-bg:  rgba(0, 54, 99, .16);
+  --text:     #eaf0ff;
+  --muted:    #a7b3d6;
+  --line:     rgba(255, 255, 255, .10);
+  --line2:    rgba(255, 255, 255, .06);
+  --accent:   #42b7df;
+  --accent2:  #6aa6ff;
+  --accent-bg:  rgba(66, 183, 223, .10);
+  --accent-bg2: rgba(66, 183, 223, .16);
+  --accent-br:  rgba(66, 183, 223, .12);
+  --accent-bra: rgba(66, 183, 223, .55);
+  --ok:       #2ecc71;
+  --danger:   #ff6b6b;
+  --shadow:   0 12px 30px rgba(0,0,0,.35);
+  --r-sm:     12px;
+  --r-md:     16px;
+  --r-lg:     20px;
+  --sans:     "Inter", "Sofia Pro", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.45;
+  overflow-x: hidden;
+}
+
+/* ── HERO ── */
+.hero {
+  background: linear-gradient(160deg, #001733 0%, #011f45 55%, #011e35 100%);
+  padding: 52px 32px 44px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% -5%, rgba(66,183,223,.12) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+/* Logo top-right */
+.hero-logo {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  opacity: .9;
+}
+.hero-logo svg {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-eye {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+  display: block;
+}
+.hero h1 {
+  font-size: clamp(32px, 7vw, 60px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  background: linear-gradient(140deg, var(--text) 30%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 14px;
+}
+.hero p {
+  font-size: 14px;
+  color: var(--muted);
+  max-width: 460px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ── WRAPPER ── */
+.wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 28px 20px 56px;
+  display: grid;
+  gap: 12px;
+}
+
+/* ── SECTION CARD ── */
+.section {
+  background: var(--panel);
+  border: 1px solid var(--accent-br);
+  border-radius: var(--r-lg);
+  padding: 26px 28px;
+  box-shadow: var(--shadow);
+}
+.section-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line2);
+}
+
+/* ── FIELDS GRID ── */
+.fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px 32px;
+}
+@media (max-width: 580px) { .fields-grid { grid-template-columns: 1fr; } }
+
+.field {}
+.field-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.field-val {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -.3px;
+}
+
+/* ── SLIDER ── */
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 3px;
+  background: var(--panel2);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  margin: 6px 0 4px;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 17px; height: 17px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--bg);
+  box-shadow: 0 0 10px rgba(66,183,223,.45);
+  cursor: pointer;
+}
+input[type=range]::-moz-range-thumb {
+  width: 17px; height: 17px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--bg);
+  cursor: pointer;
+}
+.slider-hints {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 3px;
+  opacity: .7;
+}
+
+/* ── PILLS ── */
+.pills { display: flex; flex-wrap: wrap; gap: 7px; }
+.pill {
+  padding: 7px 15px;
+  background: rgba(255,255,255,.04);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .18s ease;
+  white-space: nowrap;
+  line-height: 1;
+  box-shadow: none;
+}
+.pill:hover {
+  border-color: var(--accent-bra);
+  color: var(--text);
+  background: var(--accent-bg);
+}
+.pill.on {
+  border-color: var(--accent-bra);
+  color: var(--accent);
+  background: var(--accent-bg2);
+  box-shadow: 0 0 0 1px rgba(66,183,223,.15);
+}
+
+/* ── RESULTS SECTION ── */
+.results-section {
+  background: var(--panel);
+  border: 1px solid rgba(66,183,223,.20);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.results-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+.results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.results-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.results-sub {
+  font-size: 11px;
+  color: var(--muted);
+  opacity: .8;
+}
+
+/* ── MODEL CARDS ── */
+.model-list { display: grid; gap: 10px; }
+
+.mcard {
+  background: var(--card-bg);
+  border: 1px solid var(--accent-br);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  display: flex;
+  transition: border-color .2s ease, transform .15s ease;
+}
+.mcard:hover { border-color: rgba(66,183,223,.30); transform: translateY(-1px); }
+.mcard.r1 {
+  border-color: var(--accent-bra);
+  background: rgba(66,183,223,.07);
+}
+.mcard.r2 { border-color: rgba(106,166,255,.30); }
+
+/* Rank badge */
+.mcard-rank {
+  width: 50px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba(255,255,255,.03);
+  border-right: 1px solid var(--line2);
+}
+.rank-n {
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+}
+.r1 .rank-n { color: var(--accent); }
+.r2 .rank-n { color: var(--accent2); }
+.r3 .rank-n { color: var(--muted); }
+.rank-s { font-size: 10px; color: var(--accent); opacity: .8; }
+.r2 .rank-s, .r3 .rank-s { display: none; }
+
+/* Card body */
+.mcard-body {
+  padding: 16px 20px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.mcard-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.r1 .mcard-badge { color: var(--accent); }
+.r2 .mcard-badge { color: var(--accent2); }
+.r3 .mcard-badge { color: var(--muted); }
+
+.mcard-name {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1.1;
+  margin-bottom: 4px;
+  letter-spacing: -.5px;
+}
+.mcard-name .brand-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-right: 6px;
+  letter-spacing: 0;
+}
+.mcard-desc { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.mcard-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-top: 4px;
+  letter-spacing: -.2px;
+}
+
+/* Stats */
+.mcard-stats { display: flex; gap: 18px; flex-shrink: 0; }
+.stat { text-align: center; }
+.stat-n {
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.5px;
+}
+.r1 .stat-n { color: var(--accent); }
+.r2 .stat-n { color: var(--accent2); }
+.r3 .stat-n { color: var(--muted); }
+.stat-u { font-size: 10px; color: var(--muted); margin-top: 2px; opacity: .8; }
+
+/* Tags */
+.mcard-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.tag {
+  padding: 3px 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.tag.good {
+  background: rgba(66,183,223,.08);
+  border-color: rgba(66,183,223,.30);
+  color: var(--accent);
+}
+
+/* Match bar */
+.match-wrap { width: 100%; margin-top: 12px; }
+.match-hd {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+}
+.match-hd span { font-weight: 700; color: var(--text); }
+.match-bg {
+  height: 3px;
+  background: rgba(255,255,255,.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.match-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+.r2 .match-fill { background: var(--accent2); }
+.r3 .match-fill { background: var(--muted); opacity: .5; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(66,183,223,.50); border-radius: 3px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 520px) {
+  .mcard-stats { gap: 12px; }
+  .stat-n { font-size: 20px; }
+  .mcard-name { font-size: 20px; }
+  .section { padding: 18px 16px; }
+  .results-section { padding: 20px 16px; }
+  .hero { padding: 44px 20px 36px; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-logo"><svg id="Livello_1" data-name="Livello 1" xmlns="http://www.w3.org/2000/svg" width="501.8901" height="501.8804" viewBox="0 0 501.8901 501.8804">
+  <g>
+    <path d="M275.48,48.4199c-.2397.5303-.4897,1.0601-.73,1.6001-.9297,2.04-1.8101,3.9902-2.6597,5.8501-.6299,1.3799-1.23,2.71-1.8203,3.9902-11.9697,26.0801-16.2998,32.8896-29.7197,35.5698-5.0898.3398-10.1201.9199-15.0703,1.73-73.96,12.1602-130.3896,76.3799-130.3896,153.7803,0,33.5996,10.6396,64.7197,28.73,90.1699.02.0298.0498.0596.0698.0898,2.3901,3.3701,4.9199,6.6499,7.5801,9.8101.02.02.0298.04.04.0601,8.6699,12.46,7.04,19.0801-5.2603,46.4097-1.3198,2.9399-2.77,6.1304-4.3501,9.5903-.6597,1.4497-1.3096,2.8701-1.9297,4.25-12.6699,27.7397-19.4702,40.4897-37.04,26l-.0601-.0601C31.98,391.3501,0,324.8804,0,250.9404,0,112.3501,112.3604,0,250.9399,0c1.9805,0,3.96.02,5.9204.0703.3501.0098.6997.02,1.0498.0298,38.8198,1.23,34.5298,11,17.5698,48.3198Z" fill="#fff"/>
+    <path d="M501.8901,250.9404c0,15.2998-1.3701,30.2598-4,44.7998-21.1201,117.2197-123.6499,206.1401-246.9502,206.1401-9.3198,0-18.5195-.5103-27.5796-1.5-35.8604-4.9204-32.6104-14.6001-17.8999-46.9902l1.2798-2.7998c1.1201-2.4702,2.1899-4.8003,3.1899-7.0103,15.4502-33.79,18.0801-37.02,36.79-36.8501.1401-.0098.2798-.0098.4199,0,1.0098.04,2.0498.0601,3.0703.0503.1499,0,.2998.0098.4497.0098h.2798c70.5103,0,130.0703-46.8101,149.3203-111.0498h-121.3901c-23.2397,0-27.6201-3.48-27.9302-40.1802v-9.27c.3301-36.71,4.6904-40.1499,27.9302-40.1499h183.1899c26.5303.21,35.5103,2.5103,38.4502,18.3799.9102,8.6802,1.3799,17.4902,1.3799,26.4204Z" fill="#fff"/>
+  </g>
+  <circle cx="430.332" cy="70.0062" r="60.3512" fill="#42b7df"/>
+</svg></div>
+  <span class="hero-eye">Configuratore</span>
+  <h1>Trova il tuo<br>modello ideale</h1>
+  <p>Dimmi come usi l'auto ogni giorno e troverò i tre modelli elettrici più adatti a te.</p>
+</div>
+
+<div class="wrapper">
+
+  <div class="section">
+    <div class="section-label">Il tuo utilizzo quotidiano</div>
+    <div class="fields-grid">
+
+      <div class="field">
+        <div class="field-label">Km al giorno <span class="field-val" id="f-km">50 km</span></div>
+        <input type="range" id="sl-km" min="10" max="300" value="50" step="5" oninput="sync()">
+        <div class="slider-hints"><span>10 km</span><span>300 km</span></div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Temperatura esterna <span class="field-val" id="f-temp">20°C</span></div>
+        <input type="range" id="sl-temp" min="-10" max="40" value="20" step="5" oninput="sync()">
+        <div class="slider-hints"><span>-10°C ❄️</span><span>40°C ☀️</span></div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Tipo di percorso</div>
+        <div class="pills">
+          <button class="pill" onclick="pick('percorso','urbano',this)">🏙️ Città</button>
+          <button class="pill on" onclick="pick('percorso','misto',this)">🛣️ Misto</button>
+          <button class="pill" onclick="pick('percorso','autostrada',this)">🛤️ Autostrada</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Stile di guida</div>
+        <div class="pills">
+          <button class="pill" onclick="pick('guida','eco',this)">🌿 Eco</button>
+          <button class="pill on" onclick="pick('guida','normale',this)">Normale</button>
+          <button class="pill" onclick="pick('guida','sportivo',this)">🏁 Sport</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Ricarica e persone</div>
+    <div class="fields-grid">
+
+      <div class="field">
+        <div class="field-label">Ricarica a casa?</div>
+        <div class="pills">
+          <button class="pill on" onclick="pick('home','si',this)">✅ Sì</button>
+          <button class="pill" onclick="pick('home','no',this)">❌ No</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Tipo di ricarica disponibile</div>
+        <div class="pills">
+          <button class="pill" onclick="pick('ricarica','presa',this)">🔌 Presa 2,3kW</button>
+          <button class="pill on" onclick="pick('ricarica','wallbox',this)">⚡ Wallbox</button>
+          <button class="pill" onclick="pick('ricarica','rapida',this)">🏎️ DC Rapida</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Passeggeri abituali</div>
+        <div class="pills">
+          <button class="pill on" onclick="pick('pass','1-2',this)">👤 1-2</button>
+          <button class="pill" onclick="pick('pass','3-4',this)">👥 3-4</button>
+          <button class="pill" onclick="pick('pass','5+',this)">👨‍👩‍👧‍👦 5+</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SEZIONE BUDGET -->
+  <div class="section">
+    <div class="section-label">Il tuo budget</div>
+    <div class="field">
+      <div class="field-label">Fascia di prezzo</div>
+      <div class="pills">
+        <button class="pill" onclick="pick('budget','10-20',this)">Fino a 20.000€</button>
+        <button class="pill" onclick="pick('budget','20-30',this)">20.000 – 30.000€</button>
+        <button class="pill on" onclick="pick('budget','30-40',this)">30.000 – 40.000€</button>
+        <button class="pill" onclick="pick('budget','40-50',this)">40.000 – 50.000€</button>
+        <button class="pill" onclick="pick('budget','50+',this)">Oltre 50.000€</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="results-section">
+    <div class="results-header">
+      <div class="results-title">I modelli consigliati per te</div>
+      <div class="results-sub" id="results-sub">Basato sul tuo profilo</div>
+    </div>
+    <div class="model-list" id="model-list"></div>
+  </div>
+
+</div>
+
+<script>
+const CARS = [
+  // ── Peugeot ──
+  { id:'e208',    name:'e-208',        brand:'Peugeot',   price:35707, bat:51,   wltp:345, maxAC:11,  maxDC:100, seg:'city',   maxPass:2, desc:'City car compatta e agile' },
+  { id:'e2008',   name:'e-2008',       brand:'Peugeot',   price:39607, bat:54,   wltp:406, maxAC:11,  maxDC:100, seg:'suv-s',  maxPass:4, desc:'SUV compatto, versatile' },
+  { id:'e308',    name:'e-308',        brand:'Peugeot',   price:40250, bat:54,   wltp:420, maxAC:11,  maxDC:100, seg:'berli',  maxPass:4, desc:'Berlina spaziale ed efficiente' },
+  { id:'e308sw',  name:'e-308 SW',     brand:'Peugeot',   price:41250, bat:54,   wltp:410, maxAC:11,  maxDC:100, seg:'berli',  maxPass:4, desc:'Station wagon spaziosa ed efficiente' },
+  { id:'e3008',   name:'e-3008',       brand:'Peugeot',   price:44350, bat:73,   wltp:527, maxAC:11,  maxDC:160, seg:'suv-m',  maxPass:5, desc:'SUV con grande autonomia' },
+  { id:'e3008lr', name:'e-3008 LR',    brand:'Peugeot',   price:49000, bat:98,   wltp:700, maxAC:11,  maxDC:160, seg:'suv-m',  maxPass:5, desc:'Autonomia massima per lunghi percorsi' },
+  { id:'e5008',   name:'e-5008',       brand:'Peugeot',   price:48600, bat:98,   wltp:660, maxAC:11,  maxDC:160, seg:'family', maxPass:7, desc:'SUV 7 posti per famiglie numerose' },
+  // ── Leapmotor ──
+  { id:'lt03',    name:'T03',          brand:'Leapmotor', price:18900, bat:37.3, wltp:265, maxAC:6.6, maxDC:48,  seg:'city',   maxPass:4, desc:'City car compatta, ideale per la città' },
+  { id:'lc10',    name:'C10',          brand:'Leapmotor', price:36400, bat:69.9, wltp:420, maxAC:11,  maxDC:84,  seg:'suv-m',  maxPass:5, desc:'SUV medio, ampio e tecnologico' },
+  { id:'lb10s',   name:'B10 Life',     brand:'Leapmotor', price:29900, bat:56.2, wltp:361, maxAC:11,  maxDC:140, seg:'suv-s',  maxPass:5, desc:'SUV compatto, ricarica rapida DC 140kW' },
+  { id:'lb10d',   name:'B10 Design',   brand:'Leapmotor', price:33400, bat:67.1, wltp:434, maxAC:11,  maxDC:168, seg:'suv-s',  maxPass:5, desc:'SUV compatto, autonomia e ricarica top' },
+];
+
+const S = { percorso:'misto', guida:'normale', home:'si', ricarica:'wallbox', pass:'1-2', budget:'30-40' };
+
+function pick(key, val, btn) {
+  S[key] = val;
+  btn.closest('.pills').querySelectorAll('.pill').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+}
+
+const BUDGET_MAX = { '10-20':20000, '20-30':30000, '30-40':40000, '40-50':50000, '50+':999999 };
+
+function sync() {
+  document.getElementById('f-km').textContent   = document.getElementById('sl-km').value + ' km';
+  document.getElementById('f-temp').textContent = document.getElementById('sl-temp').value + '°C';
+  render();
+}
+
+function scoreCard(car) {
+  const km   = +document.getElementById('sl-km').value;
+  const temp = +document.getElementById('sl-temp').value;
+  let sc = 0, tags = [];
+
+  // ── 1. AUTONOMIA REALE (coefficiente condizioni) ──
+  let c = 1.0;
+  if (S.percorso === 'urbano')     c += 0.10;
+  if (S.percorso === 'autostrada') c -= 0.18;
+  if (S.guida === 'eco')           c += 0.08;
+  if (S.guida === 'sportivo')      c -= 0.12;
+  if (temp < 5)       c -= 0.22;
+  else if (temp < 10) c -= 0.12;
+  else if (temp < 15) c -= 0.06;
+  else if (temp > 35) c -= 0.06;
+  c = Math.max(0.45, Math.min(1.15, c));
+  const realRange = Math.round(car.wltp * c);
+
+  // ── 2. COPERTURA AUTONOMIA (peso 40) ──
+  // Premia chi copre il fabbisogno ma penalizza solo chi non ce la fa
+  const need = km * (S.home === 'si' ? 1.5 : 3.0);
+  if (realRange >= need * 2.0)      { sc += 40; tags.push({t:'Autonomia abbondante', g:true}); }
+  else if (realRange >= need * 1.3) { sc += 38; tags.push({t:'Autonomia sufficiente', g:true}); }
+  else if (realRange >= need)       { sc += 35; tags.push({t:'Autonomia adeguata', g:true}); }
+  else if (realRange >= need * 0.7) { sc += 15; tags.push({t:'Autonomia al limite', g:false}); }
+  else                              { sc -= 10; tags.push({t:'Autonomia insufficiente', g:false}); }
+
+  // ── 3. PASSEGGERI — filtro forte ──
+  const pn = S.pass === '5+' ? 5 : parseInt(S.pass.split('-')[1] || S.pass);
+  if (pn > car.maxPass) {
+    // Auto fisicamente insufficiente per i passeggeri
+    sc -= 40; tags.push({t:'Spazio insufficiente', g:false});
+  } else if (car.seg === 'family' && pn >= 5) {
+    sc += 15; tags.push({t:'7 posti disponibili', g:true});
+  } else if (pn >= 3 && (car.seg === 'city' || car.maxPass <= 2)) {
+    // Auto piccola con famiglia: penalità comfort
+    sc -= 20; tags.push({t:'Abitacolo stretto', g:false});
+  }
+
+  // ── 4. ADATTAMENTO AL PERCORSO ──
+  if (S.percorso === 'urbano') {
+    // Solo città: compatte avvantaggiate, grandi SUV penalizzate
+    if (car.seg === 'city')                              { sc += 14; tags.push({t:'Perfetta in città', g:true}); }
+    else if (car.seg === 'berli' || car.seg === 'suv-s') { sc += 7; }
+    else if (car.seg === 'suv-m')                        { sc += 2; }
+    else if (car.seg === 'family')                       { sc -= 5; }
+  }
+  if (S.percorso === 'misto') {
+    // Misto: SUV avvantaggiate, ma tutte competitive
+    if (car.seg.startsWith('suv'))  { sc += 12; tags.push({t:'Versatile su ogni strada', g:true}); }
+    else if (car.seg === 'berli')   { sc += 8; }
+    else if (car.seg === 'city')    { sc += 4; }
+  }
+  if (S.percorso === 'autostrada') {
+    // Autostrada: premia autonomia e batteria grande
+    if (car.bat >= 73)              { sc += 18; tags.push({t:'Ideale per i viaggi', g:true}); }
+    else if (car.bat >= 54)         { sc += 10; }
+    else                            { sc += 2; }
+    if (car.seg === 'family')       { sc += 5; tags.push({t:'Comoda sui lunghi percorsi', g:true}); }
+  }
+
+  // ── 5. RICARICA ──
+  if (S.ricarica === 'rapida') {
+    if (car.maxDC >= 150)      { sc += 20; tags.push({t:'DC ' + car.maxDC + ' kW ⚡', g:true}); }
+    else if (car.maxDC >= 100) { sc += 12; tags.push({t:'DC ' + car.maxDC + ' kW', g:true}); }
+    else                       { sc += 3; }
+  } else if (S.ricarica === 'wallbox') {
+    if (car.maxAC >= 11) { sc += 8; }
+    else                 { sc += 3; }
+  } else if (S.ricarica === 'presa') {
+    if (car.bat <= 40)   { sc += 10; tags.push({t:'Ricarica rapida a casa', g:true}); }
+    else                 { sc += 3; }
+  }
+  if (S.home === 'no' && car.maxDC >= 120) { sc += 10; tags.push({t:'Ricarica pubblica rapida', g:true}); }
+
+  // ── 6. FREDDO ──
+  if (temp < 5 && car.bat >= 65) { sc += 10; tags.push({t:'Resistente al freddo', g:true}); }
+
+  // ── 7. BUDGET — filtro morbido: guida la classifica ma non esclude mai le alternative ──
+  const bMax = BUDGET_MAX[S.budget];
+  const BUDGET_MIN = { '10-20':0, '20-30':20000, '30-40':30000, '40-50':40000, '50+':50000 };
+  const bMin = BUDGET_MIN[S.budget];
+
+  if (car.price >= bMin && car.price <= bMax) {
+    // Nella fascia: bonus pieno
+    sc += 30; tags.push({t:'Nella tua fascia 💰', g:true});
+  } else if (car.price > bMax) {
+    // Sopra il budget: penalità PROPORZIONALE — più sei lontano, più perdi punti
+    const over = (car.price - bMax) / bMax; // es. 0.49 = 49% oltre
+    const penalty = Math.round(Math.min(over * 35, 40)); // scala da 0 a max 40pt
+    sc -= penalty;
+    if (over <= 0.10)      { tags.push({t:'Leggermente oltre budget', g:false}); }
+    else if (over <= 0.35) { tags.push({t:'Oltre budget', g:false}); }
+    else                   { tags.push({t:'Fuori budget', g:false}); }
+  } else {
+    // Sotto il minimo della fascia: penalità leggera, auto piccole non monopolizzano
+    const under = bMin > 0 ? (bMin - car.price) / bMin : 0;
+    if (under <= 0.15)     { sc -= 5;  }
+    else if (under <= 0.40){ sc -= 15; tags.push({t:'Sotto la tua fascia', g:false}); }
+    else                   { sc -= 25; tags.push({t:'Fascia molto diversa', g:false}); }
+  }
+
+  return { ...car, sc: Math.max(0, sc), realRange, tags: tags.slice(0, 3) };
+}
+
+function render() {
+  const ranked = CARS.map(scoreCard).sort((a,b) => b.sc - a.sc);
+  const max = ranked[0].sc || 1;
+  const rk = ['r1','r2','r3'];
+  const lb = ['⭐ Miglior scelta', '2ª scelta', '3ª scelta'];
+
+  document.getElementById('model-list').innerHTML = ranked.slice(0,3).map((c,i) => {
+    const pct = Math.round((c.sc / max) * 100);
+    const tagsHtml = c.tags.map(t => `<span class="tag ${t.g?'good':''}">${t.t}</span>`).join('');
+    return `<div class="mcard ${rk[i]}">
+      <div class="mcard-rank"><div class="rank-n">${i+1}</div><div class="rank-s">★</div></div>
+      <div class="mcard-body">
+        <div style="flex:1;min-width:0">
+          <div class="mcard-badge">${lb[i]}</div>
+          <div class="mcard-name"><span class="brand-label">${c.brand}</span>${c.name}</div>
+          <div class="mcard-desc">${c.desc}</div>
+          <div class="mcard-price">${c.price.toLocaleString('it-IT')} €</div>
+          <div class="mcard-tags">${tagsHtml}</div>
+          <div class="match-wrap">
+            <div class="match-hd">Compatibilità <span>${pct}%</span></div>
+            <div class="match-bg"><div class="match-fill" style="width:${pct}%"></div></div>
+          </div>
+        </div>
+        <div class="mcard-stats">
+          <div class="stat"><div class="stat-n">${c.realRange}</div><div class="stat-u">km reali</div></div>
+          <div class="stat"><div class="stat-n">${c.bat}</div><div class="stat-u">kWh</div></div>
+          <div class="stat"><div class="stat-n">${c.maxDC}</div><div class="stat-u">kW DC</div></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const km = document.getElementById('sl-km').value;
+  const temp = document.getElementById('sl-temp').value;
+  document.getElementById('results-sub').textContent =
+    `${km} km/g · ${temp}°C · ${S.percorso} · ${S.guida} · ${S.pass} persone`;
+
+  sendH();
+}
+
+var _lh = 0;
+function sendH() {
+  setTimeout(function(){
+    var h = document.documentElement.scrollHeight;
+    if(Math.abs(h-_lh)>4){_lh=h;window.parent.postMessage({evSimHeight:h},'*');}
+  }, 120);
+}
+
+sync();
+</script>
+</body>
+</html>
